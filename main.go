@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	command := flag.String("cmd", "make tailwind", "Command name and arguments")
-	folder := flag.String("dir", "views", "Folder for watching")
+	command := flag.String("cmd", "make tailwind", "Command name")
+	folder := flag.String("dir", "views", "Folder path")
 	extension := flag.String("ext", ".html", "File extension")
 
 	flag.Parse()
