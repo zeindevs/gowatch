@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
+	"io/fs"
 	"log"
-	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -19,17 +20,15 @@ func main() {
 	flag.Parse()
 
 	commands := strings.Split(*command, " ")
-	folders := []string{*folder}
+	folders := []string{}
 
-	entry, err := os.ReadDir(*folder)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, f := range entry {
-		if f.IsDir() {
-			folders = append(folders, path.Join(*folder, f.Name()))
+	if err := filepath.Walk(*folder, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			folders = append(folders, path)
 		}
+		return nil
+	}); err != nil {
+		log.Fatal(err)
 	}
 
 	watcher, err := fsnotify.NewWatcher()
@@ -66,8 +65,7 @@ func main() {
 	}()
 
 	for _, folder := range folders {
-		err = watcher.Add(folder)
-		if err != nil {
+		if err := watcher.Add(folder); err != nil {
 			log.Fatal(err)
 		}
 		log.Println("watching", folder)
